@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Молоко</string>
+    <string name="menu_home">Головна</string>
+    <string name="menu_milk">Молоко</string>
+    <string name="menu_contacts">Контакти</string>
+    <string name="menu_map">Молоко</string>
+    <string name="year">Рік</string>
+    <string name="production">Виробництво</string>
+    <string name="cost">Вартість</string>
+</resources>
