@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/green"
+        android:padding="5dp">
+
+        <TextView
+            android:id="@+id/milk_year"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="10dp"
+            android:text="YEAR"
+            android:textSize="24sp" />
+
+        <LinearLayout
+            android:padding="5dp"
+            android:orientation="horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+            <TextView
+                android:id="@+id/milk_cost"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="COST"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=" т," />
+
+        </LinearLayout>
+        <LinearLayout
+            android:padding="5dp"
+            android:orientation="horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/milk_production"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="PRODUCTION" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=" грн" />
+
+
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:gravity="end"
+            android:layout_height="fill_parent"
+            >
+            <ImageButton
+                android:background="@color/green"
+                android:id="@+id/button_edit"
+                android:layout_width="40dp"
+                android:layout_height="fill_parent"
+                android:src="@android:drawable/ic_menu_edit"/>
+            <ImageButton
+                android:background="@color/green"
+                android:id="@+id/button_delete"
+                android:layout_width="40dp"
+                android:layout_height="fill_parent"
+                android:src="@android:drawable/ic_menu_delete"/>
+        </LinearLayout>
+
+    </LinearLayout>
+</layout>

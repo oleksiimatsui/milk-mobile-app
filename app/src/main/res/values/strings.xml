@@ -7,4 +7,5 @@
     <string name="year">Рік</string>
     <string name="production">Виробництво</string>
     <string name="cost">Вартість</string>
+    <string name="add_row">Створити запис</string>
 </resources>

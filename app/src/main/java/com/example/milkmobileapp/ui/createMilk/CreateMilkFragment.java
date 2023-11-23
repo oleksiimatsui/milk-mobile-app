@@ -11,9 +11,13 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.fragment.NavHostFragment;
 
+import com.example.milkmobileapp.DBHelper;
+import com.example.milkmobileapp.DBManager;
+import com.example.milkmobileapp.Milk;
+import com.example.milkmobileapp.R;
 import com.example.milkmobileapp.databinding.FragmentCreateMilkBinding;
-import com.example.milkmobileapp.ui.home.HomeViewModel;
 
 public class CreateMilkFragment extends Fragment {
 
@@ -32,7 +36,30 @@ public class CreateMilkFragment extends Fragment {
         final TextView production = binding.textInputProduction;
         final Button save = binding.buttonCreateMilkSave;
 
+        save.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                сreateMilk(v);
+            }
+        });
+
         return root;
+    }
+
+    private void сreateMilk(View v) {
+        final EditText year = binding.textInputYear;
+        final EditText cost = binding.textInputCost;
+        final EditText production = binding.textInputProduction;
+        int c = Integer.parseInt(cost.getText().toString());
+        int y = Integer.parseInt(year.getText().toString());
+        int p = Integer.parseInt(production.getText().toString());
+        DBHelper DB = new DBHelper(this.getContext());
+        DBManager manager = new DBManager(DB);
+        Milk table = new Milk(0, y, c, p);
+        manager.addRow(table);
+        Bundle bundle = new Bundle();
+        NavHostFragment.findNavController(CreateMilkFragment.this)
+                .navigate(R.id.action_createMilk_to_nav_milk, bundle);
     }
 
     public void saveChanges(View view){

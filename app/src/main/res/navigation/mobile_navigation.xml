@@ -15,7 +15,11 @@
         android:id="@+id/nav_milk"
         android:name="com.example.milkmobileapp.ui.milk.MilkFragment"
         android:label="@string/menu_milk"
-        tools:layout="@layout/fragment_milk" />
+        tools:layout="@layout/fragment_milk" >
+        <action
+            android:id="@+id/action_nav_milk_to_createMilk"
+            app:destination="@id/createMilk" />
+    </fragment>
 
     <fragment
         android:id="@+id/nav_contacts"
@@ -25,6 +29,10 @@
     <fragment
         android:id="@+id/createMilk"
         android:name="com.example.milkmobileapp.ui.createMilk.CreateMilkFragment"
-        android:label="fragment_create_milk"
-        tools:layout="@layout/fragment_create_milk" />
+        android:label="@string/add_row"
+        tools:layout="@layout/fragment_create_milk" >
+        <action
+            android:id="@+id/action_createMilk_to_nav_milk"
+            app:destination="@id/nav_milk" />
+    </fragment>
 </navigation>

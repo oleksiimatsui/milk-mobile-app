@@ -7,15 +7,21 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.fragment.NavHostFragment;
 
+import com.example.milkmobileapp.Contact;
 import com.example.milkmobileapp.DBHelper;
 import com.example.milkmobileapp.DBManager;
 import com.example.milkmobileapp.Milk;
@@ -24,11 +30,12 @@ import com.example.milkmobileapp.databinding.FragmentMilkBinding;
 
 import java.util.ArrayList;
 
-public class MilkFragment extends Fragment {
+public class MilkFragment extends Fragment implements AdapterCallback {
 
     private FragmentMilkBinding binding;
+    private MilkViewModel milkViewModel;
 
-    private TextView label(String text){
+   /* private TextView label(String text){
         TextView label = new TextView(this.getContext());    // part3
         label.setId( generateViewId ());
         label.setText(text);
@@ -38,12 +45,10 @@ public class MilkFragment extends Fragment {
         params.weight = 1;
         label.setLayoutParams(params);
         return label;
-    }
+    }*/
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        MilkViewModel galleryViewModel =
-                new ViewModelProvider(this).get(MilkViewModel.class);
 
         binding = FragmentMilkBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
@@ -51,8 +56,53 @@ public class MilkFragment extends Fragment {
         DBHelper DB = new DBHelper(this.getContext());
         DBManager manager = new DBManager(DB);
 
-        ArrayList<Milk> milks = manager.getTable();
+        MilkViewModel milkViewModel =
+                new ViewModelProvider(this).get(MilkViewModel.class);
+        this.milkViewModel = milkViewModel;
+        milkViewModel.setMilks(manager);
+        milkViewModel.getMilks().observe(getViewLifecycleOwner(), milkObserver);
 
+        View btn = binding.buttonAdd;
+        btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openCreateMilk(v);
+            }
+        });
+
+        return root;
+    }
+
+
+    final Observer<ArrayList<Milk>> milkObserver = new Observer<ArrayList<Milk>>() {
+        @Override
+        public void onChanged(@Nullable final ArrayList<Milk> newList) {
+            setList(newList);
+        }
+    };
+
+    public void setList(ArrayList<Milk> milks){
+        ListView listView = binding.milkList;
+
+        MilkAdapter milkAdapter = new MilkAdapter(this.getContext(), milks, this);
+        //ArrayAdapter<Milk> itemsAdapter = new ArrayAdapter<Milk>(getContext(), R.layout.milk_item, milks);
+
+        listView.setAdapter(milkAdapter);
+    }
+
+    @Override
+    public void onDeleteClicked(int itemId) {
+        // Communicate with the ViewModel and perform necessary actions
+        milkViewModel.delete(itemId);
+    }
+    @Override
+    public void onEditClicked(int itemId) {
+        // Communicate with the ViewModel and perform necessary actions
+        milkViewModel.delete(itemId);
+    }
+
+
+    /*public void setTable(ArrayList<Milk> milks){
         TableRow tr_head = new TableRow(this.getContext());
         tr_head.setId(generateViewId());
         tr_head.setBackgroundColor(Color.GRAY);        // part1
@@ -60,12 +110,11 @@ public class MilkFragment extends Fragment {
                 TableRow.LayoutParams.MATCH_PARENT,
                 TableRow.LayoutParams.WRAP_CONTENT));
 
-        TableLayout table = (TableLayout) ( root.findViewById(R.id.milk_table));
+        TableLayout table = (TableLayout) ( binding.milkTable );
         tr_head.setWeightSum(4);
         table.addView(tr_head);
 
         tr_head.addView(label(String.valueOf("Year")));
-        tr_head.addView(label(String.valueOf("Name")));
         tr_head.addView(label(String.valueOf("Production")));
         tr_head.addView(label(String.valueOf("Cost")));
 
@@ -76,13 +125,11 @@ public class MilkFragment extends Fragment {
                     TableRow.LayoutParams.MATCH_PARENT));
             tr.setWeightSum(4);
             tr.addView(label(String.valueOf(milk.Year)));
-            tr.addView(label(String.valueOf(milk.Name)));
             tr.addView(label(String.valueOf(milk.Production)));
             tr.addView(label(String.valueOf(milk.Cost)));
             table.addView(tr);
         });
-        return root;
-    }
+    }*/
 
     @Override
     public void onDestroyView() {
@@ -91,6 +138,8 @@ public class MilkFragment extends Fragment {
     }
 
     public void openCreateMilk(View view){
-
+        Bundle bundle = new Bundle();
+        NavHostFragment.findNavController(MilkFragment.this)
+                .navigate(R.id.action_nav_milk_to_createMilk, bundle);
     }
 }

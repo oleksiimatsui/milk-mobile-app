@@ -1,13 +1,10 @@
 package com.example.milkmobileapp;
 
 import android.content.ContentValues;
-import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 public class DBManager {
 
@@ -57,7 +54,7 @@ public class DBManager {
                         int year = cursor.getInt(cursor.getColumnIndexOrThrow(FeedReaderContract.FeedEntry.MILK_YEAR));
                         float cost = cursor.getFloat(cursor.getColumnIndexOrThrow(FeedReaderContract.FeedEntry.MILK_COST));
                         float production = cursor.getFloat(cursor.getColumnIndexOrThrow(FeedReaderContract.FeedEntry.MILK_PRODUCTION));
-                        Milk obj = new Milk(id, name,year,cost,production);
+                        Milk obj = new Milk(id, year,cost,production);
                         list.add(obj);
                     } while (cursor.moveToNext());
                 }
@@ -73,4 +70,22 @@ public class DBManager {
         return list;
 
     }
+
+
+    public void addRow(Milk table){
+        SQLiteDatabase db = DB.getReadableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(FeedReaderContract.FeedEntry.MILK_COST, table.Cost);
+        values.put(FeedReaderContract.FeedEntry.MILK_PRODUCTION, table.Production);
+        values.put(FeedReaderContract.FeedEntry.MILK_YEAR, table.Year);
+        long newRowId;
+        newRowId = db.insert(FeedReaderContract.FeedEntry.TABLE_NAME, null, values);
+    }
+    public void deleteRow(int id){
+        SQLiteDatabase db = DB.getReadableDatabase();
+        db.delete(FeedReaderContract.FeedEntry.TABLE_NAME,  FeedReaderContract.FeedEntry.MILK_ID+ " = ?",new String[]{Long.toString(id)});
+    }
+
+
 }

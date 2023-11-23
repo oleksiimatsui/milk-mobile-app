@@ -26,7 +26,7 @@ public class MainActivity extends AppCompatActivity {
 
         DB = new DBHelper(this);
         DBManager manager = new DBManager(DB);
-        manager.refreshTable();
+        //manager.refreshTable();
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());

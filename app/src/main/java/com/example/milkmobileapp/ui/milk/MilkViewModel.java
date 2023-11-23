@@ -4,16 +4,35 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import com.example.milkmobileapp.DBManager;
+import com.example.milkmobileapp.Milk;
+
+import java.util.ArrayList;
+
 public class MilkViewModel extends ViewModel {
 
-    private final MutableLiveData<String> mText;
+    private final MutableLiveData<ArrayList<Milk>> milks;
+    private DBManager manager;
 
     public MilkViewModel() {
-        mText = new MutableLiveData<>();
-        mText.setValue("This is gallery fragment");
+        milks = new MutableLiveData<>();
+        ArrayList<Milk> list = new ArrayList<>();
+
+        milks.setValue(list);
     }
 
-    public LiveData<String> getText() {
-        return mText;
+    public LiveData<ArrayList<Milk>> getMilks() {
+        return milks;
+    }
+
+    public void setMilks(DBManager _manager){
+        this.manager = _manager;
+        ArrayList<Milk> list = manager.getTable();
+        milks.setValue(list);
+    }
+
+    public void delete(int id){
+        manager.deleteRow(id);
+        milks.setValue(manager.getTable());
     }
 }

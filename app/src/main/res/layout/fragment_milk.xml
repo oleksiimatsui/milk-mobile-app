@@ -9,19 +9,31 @@
 
 
     <TableLayout
+        android:layout_margin="10dp"
+        android:padding="10dp"
         android:id="@+id/milk_table"
         android:layout_width="409dp"
         android:layout_height="729dp"
-        android:layout_marginTop="16dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
-
     </TableLayout>
 
+    <ListView
+        android:id="@+id/milk_list"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:outlineAmbientShadowColor="@color/black"
+        android:cacheColorHint="@color/black"
+        android:dividerHeight="1dp"
+        android:divider="@color/black"
+
+        />
+
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fab"
+        android:id="@+id/button_add"
         android:layout_width="134dp"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
