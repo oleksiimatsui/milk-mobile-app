@@ -50,7 +50,6 @@ public class DBManager {
                 if (cursor.moveToFirst()) {
                     do {
                         int id = cursor.getInt(cursor.getColumnIndexOrThrow(FeedReaderContract.FeedEntry.MILK_ID));
-                        String name = cursor.getString(cursor.getColumnIndexOrThrow(FeedReaderContract.FeedEntry.MILK_NAME));
                         int year = cursor.getInt(cursor.getColumnIndexOrThrow(FeedReaderContract.FeedEntry.MILK_YEAR));
                         float cost = cursor.getFloat(cursor.getColumnIndexOrThrow(FeedReaderContract.FeedEntry.MILK_COST));
                         float production = cursor.getFloat(cursor.getColumnIndexOrThrow(FeedReaderContract.FeedEntry.MILK_PRODUCTION));
@@ -71,7 +70,32 @@ public class DBManager {
 
     }
 
-
+    public Milk getRow(int id){
+        SQLiteDatabase db = DB.getReadableDatabase();
+        String[] projection = {
+                FeedReaderContract.FeedEntry._ID,
+                FeedReaderContract.FeedEntry.MILK_NAME,
+                FeedReaderContract.FeedEntry.MILK_PRODUCTION,
+                FeedReaderContract.FeedEntry.MILK_COST,
+                FeedReaderContract.FeedEntry.MILK_YEAR,
+        };
+        String selection = FeedReaderContract.FeedEntry._ID + " = ?";
+        String[] selectionArgs = { String.valueOf(id) };
+        Cursor cursor = db.query(
+                FeedReaderContract.FeedEntry.TABLE_NAME,
+                projection,
+                selection,
+                selectionArgs,
+                null,
+                null,
+                null);
+        cursor.moveToFirst();
+        int year = cursor.getInt(cursor.getColumnIndexOrThrow(FeedReaderContract.FeedEntry.MILK_YEAR));
+        float cost = cursor.getFloat(cursor.getColumnIndexOrThrow(FeedReaderContract.FeedEntry.MILK_COST));
+        float production = cursor.getFloat(cursor.getColumnIndexOrThrow(FeedReaderContract.FeedEntry.MILK_PRODUCTION));
+        Milk obj = new Milk(id, year,cost,production);
+        return obj;
+    }
     public void addRow(Milk table){
         SQLiteDatabase db = DB.getReadableDatabase();
 
@@ -86,6 +110,16 @@ public class DBManager {
         SQLiteDatabase db = DB.getReadableDatabase();
         db.delete(FeedReaderContract.FeedEntry.TABLE_NAME,  FeedReaderContract.FeedEntry.MILK_ID+ " = ?",new String[]{Long.toString(id)});
     }
-
-
+    public void editRow(int id, Milk table){
+        SQLiteDatabase db = DB.getReadableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(FeedReaderContract.FeedEntry.MILK_COST, table.Cost);
+        values.put(FeedReaderContract.FeedEntry.MILK_PRODUCTION, table.Production);
+        values.put(FeedReaderContract.FeedEntry.MILK_YEAR, table.Year);
+        db.update(
+                FeedReaderContract.FeedEntry.TABLE_NAME,
+                values,
+                FeedReaderContract.FeedEntry.MILK_ID+ " = ?",
+                new String[]{Long.toString(id)});
+    }
 }

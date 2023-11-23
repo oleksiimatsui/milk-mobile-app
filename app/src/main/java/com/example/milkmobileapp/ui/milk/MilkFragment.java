@@ -27,6 +27,7 @@ import com.example.milkmobileapp.DBManager;
 import com.example.milkmobileapp.Milk;
 import com.example.milkmobileapp.R;
 import com.example.milkmobileapp.databinding.FragmentMilkBinding;
+import com.example.milkmobileapp.ui.editMilk.EditMilkFragment;
 
 import java.util.ArrayList;
 
@@ -83,10 +84,7 @@ public class MilkFragment extends Fragment implements AdapterCallback {
 
     public void setList(ArrayList<Milk> milks){
         ListView listView = binding.milkList;
-
         MilkAdapter milkAdapter = new MilkAdapter(this.getContext(), milks, this);
-        //ArrayAdapter<Milk> itemsAdapter = new ArrayAdapter<Milk>(getContext(), R.layout.milk_item, milks);
-
         listView.setAdapter(milkAdapter);
     }
 
@@ -98,7 +96,11 @@ public class MilkFragment extends Fragment implements AdapterCallback {
     @Override
     public void onEditClicked(int itemId) {
         // Communicate with the ViewModel and perform necessary actions
-        milkViewModel.delete(itemId);
+       /* Bundle bundle = new Bundle();
+        bundle.putInt("ID", itemId);*/
+        EditMilkFragment fragment = EditMilkFragment.newInstance(itemId);
+        NavHostFragment.findNavController(MilkFragment.this)
+                .navigate(R.id.action_nav_milk_to_editMilkFragment, fragment.getArguments());
     }
 
 

@@ -65,12 +65,19 @@ public class MilkAdapter extends BaseAdapter {
         production.setText(String.valueOf(milk.Production));
 
         View delete = convertView.findViewById(R.id.button_delete);
+        View edit = convertView.findViewById(R.id.button_edit);
 
         int id = milk.Id;
         delete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 callback.onDeleteClicked(id);
+            }
+        });
+        edit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                callback.onEditClicked(id);
             }
         });
 

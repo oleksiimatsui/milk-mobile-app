@@ -8,4 +8,7 @@
     <string name="production">Виробництво</string>
     <string name="cost">Вартість</string>
     <string name="add_row">Створити запис</string>
+    <string name="edit_row">Редагувати запис</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

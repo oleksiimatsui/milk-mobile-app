@@ -1,4 +1,4 @@
-package com.example.milkmobileapp.ui.createMilk;
+package com.example.milkmobileapp.ui.editMilk;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -16,33 +16,63 @@ import com.example.milkmobileapp.DBHelper;
 import com.example.milkmobileapp.DBManager;
 import com.example.milkmobileapp.Milk;
 import com.example.milkmobileapp.R;
-import com.example.milkmobileapp.databinding.FragmentCreateMilkBinding;
+import com.example.milkmobileapp.databinding.FragmentEditMilkBinding;
 
-public class CreateMilkFragment extends Fragment {
+public class EditMilkFragment extends Fragment {
 
-    private FragmentCreateMilkBinding binding;
+    private FragmentEditMilkBinding binding;
+
+    private static final String ID = "ID";
+    private int id;
+    public static EditMilkFragment newInstance(int itemId) {
+        EditMilkFragment fragment = new EditMilkFragment();
+        Bundle args = new Bundle();
+        args.putInt(ID, itemId);
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    public EditMilkFragment() {
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (getArguments() != null) {
+            id = getArguments().getInt(ID);
+            System.out.println("getting " + id);
+        }
+    }
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        binding = FragmentCreateMilkBinding.inflate(inflater, container, false);
-        View root = binding.getRoot();
+        binding = FragmentEditMilkBinding.inflate(inflater, container, false);
+        //View root = inflater.inflate(R.layout.fragment_edit_milk, container, false);
+
 
         final TextView year = binding.textInputYear;
         final TextView cost = binding.textInputCost;
         final TextView production = binding.textInputProduction;
-        final Button save = binding.buttonCreateMilkSave;
+        final Button save = binding.buttonEditMilkSave;
 
+        DBHelper DB = new DBHelper(this.getContext());
+        DBManager manager = new DBManager(DB);
+        Milk milk = manager.getRow(id);
+        year.setText(String.valueOf(milk.Year));
+        cost.setText(String.valueOf(milk.Cost));
+        production.setText(String.valueOf(milk.Production));
         save.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                сreateMilk(v);
+                editMilk(v);
             }
         });
-
-        return root;
+        return binding.getRoot();
     }
 
-    private void сreateMilk(View v) {
+
+
+    private void editMilk(View v) {
         final EditText year = binding.textInputYear;
         final EditText cost = binding.textInputCost;
         final EditText production = binding.textInputProduction;
@@ -52,14 +82,10 @@ public class CreateMilkFragment extends Fragment {
         DBHelper DB = new DBHelper(this.getContext());
         DBManager manager = new DBManager(DB);
         Milk table = new Milk(0, y, c, p);
-        manager.addRow(table);
+        manager.editRow(id, table);
         Bundle bundle = new Bundle();
-        NavHostFragment.findNavController(CreateMilkFragment.this)
-                .navigate(R.id.action_editMilk_to_nav_milk, bundle);
-    }
-
-    public void saveChanges(View view){
-        return;
+        NavHostFragment.findNavController(EditMilkFragment.this)
+                .navigate(R.id.action_editMilkFragment_to_nav_milk, bundle);
     }
 
     @Override
