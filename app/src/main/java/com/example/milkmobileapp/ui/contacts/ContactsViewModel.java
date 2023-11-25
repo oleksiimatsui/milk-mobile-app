@@ -2,6 +2,7 @@ package com.example.milkmobileapp.ui.contacts;
 
 import static android.app.PendingIntent.getActivity;
 
+import android.annotation.SuppressLint;
 import android.content.ContentResolver;
 import android.database.Cursor;
 import android.provider.ContactsContract;
@@ -33,41 +34,41 @@ public class ContactsViewModel extends ViewModel {
         mText.setValue(contactList);
     }
 
-    private static final String[] PROJECTION = new String[]{
-            ContactsContract.CommonDataKinds.Phone.CONTACT_ID,
-            ContactsContract.Contacts.DISPLAY_NAME,
-            ContactsContract.CommonDataKinds.Phone.NUMBER
-    };
-
+    @SuppressLint("Range")
     private void getContactList(ContentResolver cr) {
         contactList = new ArrayList<>();
         Cursor cursor;
-        try{
-            cursor = cr.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, PROJECTION, null, null, ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME + " ASC");
-        }
-        catch (Exception e){
-            return;
-        }
-        if (cursor != null) {
-            HashSet<String> mobileNoSet = new HashSet<String>();
-            try {
-                final int nameIndex = cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME);
-                final int numberIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
+        String[] projectionPhone = {
+                ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME,
+                ContactsContract.CommonDataKinds.Phone.NUMBER
+        };
+        Cursor cursorPhone = cr.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, projectionPhone, null, null, null);
+        String[] projectionAddress = {
+                ContactsContract.CommonDataKinds.StructuredPostal.DISPLAY_NAME,
+                ContactsContract.CommonDataKinds.StructuredPostal.FORMATTED_ADDRESS
+        };
 
-                String name, number;
-                while (cursor.moveToNext()) {
-                    name = cursor.getString(nameIndex);
-                    number = cursor.getString(numberIndex);
-                    number = number.replace(" ", "");
-                    if (!mobileNoSet.contains(number)) {
-                        contactList.add(new Contact(name, number));
-                        mobileNoSet.add(number);
-                        Log.d("hvy", "onCreaterrView  Phone Number: name = " + name
-                                + " No = " + number);
+        // Query for addresses
+        Cursor cursorAddress = cr.query(ContactsContract.CommonDataKinds.StructuredPostal.CONTENT_URI, projectionAddress, null, null, null);
+
+        if (cursorPhone != null && cursorAddress != null) {
+            try {
+                while (cursorPhone.moveToNext()) {
+                    String contactAddress;
+                    if(cursorAddress.moveToNext()){
+                        contactAddress = cursorAddress.getString(cursorAddress.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.StructuredPostal.FORMATTED_ADDRESS));
+                    }else{
+                        contactAddress = "";
                     }
+
+                    String contactName = cursorPhone.getString(cursorPhone.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
+                    String contactNumber = cursorPhone.getString(cursorPhone.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.NUMBER));
+                    Contact contact = new Contact(contactName, contactNumber, contactAddress);
+                    contactList.add(contact);
                 }
             } finally {
-                cursor.close();
+                cursorPhone.close();
+                cursorAddress.close();
             }
         }
     }
