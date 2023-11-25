@@ -27,9 +27,6 @@ public class CreateMilkFragment extends Fragment {
         binding = FragmentCreateMilkBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-        final TextView year = binding.textInputYear;
-        final TextView cost = binding.textInputCost;
-        final TextView production = binding.textInputProduction;
         final Button save = binding.buttonCreateMilkSave;
 
         save.setOnClickListener(new View.OnClickListener() {
