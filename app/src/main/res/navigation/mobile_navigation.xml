@@ -28,7 +28,11 @@
         android:id="@+id/nav_contacts"
         android:name="com.example.milkmobileapp.ui.contacts.ContactsFragment"
         android:label="@string/menu_contacts"
-        tools:layout="@layout/fragment_contacts" />
+        tools:layout="@layout/fragment_contacts" >
+        <action
+            android:id="@+id/action_nav_contacts_to_mapsFragment"
+            app:destination="@id/mapsFragment" />
+    </fragment>
     <fragment
         android:id="@+id/createMilk"
         android:name="com.example.milkmobileapp.ui.createMilk.CreateMilkFragment"
@@ -46,5 +50,14 @@
         <action
             android:id="@+id/action_editMilkFragment_to_nav_milk"
             app:destination="@id/nav_milk" />
+    </fragment>
+    <fragment
+        android:id="@+id/mapsFragment"
+        android:name="com.example.milkmobileapp.ui.map.MapsFragment"
+        android:label="Мапа"
+        tools:layout="@layout/fragment_maps" >
+        <action
+            android:id="@+id/action_mapsFragment_to_nav_contacts"
+            app:destination="@id/nav_contacts" />
     </fragment>
 </navigation>
