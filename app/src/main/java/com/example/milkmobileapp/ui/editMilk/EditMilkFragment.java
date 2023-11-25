@@ -47,8 +47,6 @@ public class EditMilkFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         binding = FragmentEditMilkBinding.inflate(inflater, container, false);
-        //View root = inflater.inflate(R.layout.fragment_edit_milk, container, false);
-
 
         final TextView year = binding.textInputYear;
         final TextView cost = binding.textInputCost;
