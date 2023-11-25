@@ -24,7 +24,9 @@ import com.codebyashish.googledirectionapi.ErrorHandling;
 import com.codebyashish.googledirectionapi.RouteDrawing;
 import com.codebyashish.googledirectionapi.RouteInfoModel;
 import com.codebyashish.googledirectionapi.RouteListener;
+import com.example.milkmobileapp.Contact;
 import com.example.milkmobileapp.R;
+import com.example.milkmobileapp.databinding.FragmentMapsBinding;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -52,12 +54,32 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, RouteL
 
     private FusedLocationProviderClient fusedLocationProviderClient;
 
+    private static final String CONTACT = "CONTACT";
+    private Contact contact;
+    public static MapsFragment newInstance(Contact contact) {
+        MapsFragment fragment = new MapsFragment();
+        Bundle args = new Bundle();
+        args.putSerializable(CONTACT, contact);
+        fragment.setArguments(args);
+        return fragment;
+    }
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (getArguments() != null) {
+            contact = (Contact) getArguments().getSerializable(CONTACT);
+        }
+    }
+    private FragmentMapsBinding binding;
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_maps, container, false);
+        binding = FragmentMapsBinding.inflate(inflater, container, false);
+        binding.address.setText(contact.address);
+       //return inflater.inflate(R.layout.fragment_maps, container, false);
+        return binding.getRoot();
     }
 
     @Override
@@ -168,5 +190,4 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, RouteL
         Toast.makeText(getContext(), "Route Canceled", Toast.LENGTH_SHORT).show();
     }
 }
-
 
