@@ -1,58 +1,193 @@
 package com.example.milkmobileapp.ui.map;
 
+
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
+
+import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.Manifest;
+import android.widget.Toast;
 
+import com.codebyashish.googledirectionapi.AbstractRouting;
+import com.codebyashish.googledirectionapi.ErrorHandling;
+import com.codebyashish.googledirectionapi.RouteDrawing;
+import com.codebyashish.googledirectionapi.RouteInfoModel;
+import com.codebyashish.googledirectionapi.RouteListener;
+import com.example.milkmobileapp.Contact;
 import com.example.milkmobileapp.R;
+import com.example.milkmobileapp.databinding.FragmentMapsBinding;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.android.gms.maps.model.RoundCap;
 
-public class MapsFragment extends Fragment {
 
-    private OnMapReadyCallback callback = new OnMapReadyCallback() {
+import java.util.ArrayList;
 
-        /**
-         * Manipulates the map once available.
-         * This callback is triggered when the map is ready to be used.
-         * This is where we can add markers or lines, add listeners or move the camera.
-         * In this case, we just add a marker near Sydney, Australia.
-         * If Google Play services is not installed on the device, the user will be prompted to
-         * install it inside the SupportMapFragment. This method will only be triggered once the
-         * user has installed Google Play services and returned to the app.
-         */
-        @Override
-        public void onMapReady(GoogleMap googleMap) {
-            LatLng sydney = new LatLng(-34, 151);
-            googleMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-            googleMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+
+
+public class MapsFragment extends Fragment implements OnMapReadyCallback, RouteListener {
+
+    //String endLocationName;
+
+    private LatLng startLocation, endLocation;
+    //boolean isPermissionGranted;
+    GoogleMap gMap;
+
+    private FusedLocationProviderClient fusedLocationProviderClient;
+
+    private static final String CONTACT = "CONTACT";
+    private Contact contact;
+    public static MapsFragment newInstance(Contact contact) {
+        MapsFragment fragment = new MapsFragment();
+        Bundle args = new Bundle();
+        args.putSerializable(CONTACT, contact);
+        fragment.setArguments(args);
+        return fragment;
+    }
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (getArguments() != null) {
+            contact = (Contact) getArguments().getSerializable(CONTACT);
         }
-    };
-
+    }
+    private FragmentMapsBinding binding;
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_maps, container, false);
+        binding = FragmentMapsBinding.inflate(inflater, container, false);
+        binding.address.setText(contact.address);
+       //return inflater.inflate(R.layout.fragment_maps, container, false);
+        return binding.getRoot();
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        SupportMapFragment mapFragment =
-                (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
-        if (mapFragment != null) {
-            mapFragment.getMapAsync(callback);
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireActivity());
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            initMap();
+        } else {
+            registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
+                if (isGranted) {
+                    initMap();
+                } else {
+                    Toast.makeText(requireContext(), "Location permission denied", Toast.LENGTH_SHORT).show();
+                }
+            }).launch(Manifest.permission.ACCESS_FINE_LOCATION);
         }
     }
+
+
+    private void initMap() {
+        SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
+        if (mapFragment != null) {
+            mapFragment.getMapAsync(this);
+        }
+    }
+
+    @Override
+    public void onMapReady(@NonNull GoogleMap googleMap) {
+        if (ActivityCompat.checkSelfPermission(this.getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this.getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        googleMap.setMyLocationEnabled(true);
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            fusedLocationProviderClient.getLastLocation().addOnSuccessListener(requireActivity(), location -> {
+                if (location != null) {
+                    LatLng myLocation = new LatLng(location.getLatitude(), location.getLongitude());
+                    endLocation = myLocation;
+                    googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myLocation, 15));
+                    googleMap.addMarker(new MarkerOptions().position(myLocation).title("My Location"));
+                } else {
+                    Toast.makeText(requireContext(), "Unable to get current location", Toast.LENGTH_SHORT).show();
+                }
+            });
+        } else {
+            Toast.makeText(requireContext(), "Location permission not granted", Toast.LENGTH_SHORT).show();
+        }
+
+        gMap = googleMap;
+        gMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+            @Override
+            public void onMapClick(@NonNull LatLng latLng) {
+                MarkerOptions markerOptions = new MarkerOptions();
+                markerOptions.position(latLng);
+                startLocation = latLng;
+                gMap.clear();
+                //geoLocate();
+                gMap.addMarker(markerOptions);
+
+                getRoute(startLocation, endLocation);
+            }
+        });
+    }
+
+    private void getRoute(LatLng start, LatLng end) {
+        RouteDrawing routeDrawing = new RouteDrawing.Builder()
+                .context(getContext())  // pass your activity or fragment's context
+                .travelMode(AbstractRouting.TravelMode.DRIVING)
+                .withListener(this).alternativeRoutes(true)
+                .waypoints(start, end)
+                .build();
+        routeDrawing.execute();
+    }
+
+    @Override
+    public void onRouteFailure(ErrorHandling e) {
+        Log.e("RouteFailure", "Error: " + e.getMessage());
+        Toast.makeText(getContext(), "Route Failure", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onRouteStart() {
+        Toast.makeText(getContext(), "Route Start", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onRouteSuccess(ArrayList<RouteInfoModel> list, int indexing) {
+        Toast.makeText(getContext(), "Route Success", Toast.LENGTH_SHORT).show();
+
+        PolylineOptions polylineOptions = new PolylineOptions();
+        ArrayList<Polyline> polylines = new ArrayList<>();
+        for (int i = 0; i < list.size(); i++) {
+            if (i == indexing) {
+                Log.e("TAG", "onRoutingSuccess: routeIndexing" + indexing);
+                polylineOptions.color(Color.BLUE);
+                polylineOptions.width(12);
+                polylineOptions.addAll(list.get(indexing).getPoints());
+                polylineOptions.startCap(new RoundCap());
+                polylineOptions.endCap(new RoundCap());
+                Polyline polyline = gMap.addPolyline(polylineOptions);
+                polylines.add(polyline);
+            }
+        }
+    }
+
+    @Override
+    public void onRouteCancelled() {
+        Toast.makeText(getContext(), "Route Canceled", Toast.LENGTH_SHORT).show();
+    }
 }
+
