@@ -58,7 +58,7 @@ public class ContactsFragment extends Fragment {
                     // Тут ви виконуєте перехід до MapsFragment
                     MapsFragment mapsFragment = new MapsFragment();
                     NavHostFragment.findNavController(ContactsFragment.this)
-                            .navigate(R.id.action_nav_contacts_to_mapsFragment, mapsFragment.getArguments());
+                            .navigate(R.id.action_nav_contacts_to_mapsFragment);
                 }
             });
         }
