@@ -1,18 +1,12 @@
 package com.example.milkmobileapp.ui.milk;
 
-import static android.view.View.generateViewId;
-
-import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.LinearLayout;
+import android.widget.CompoundButton;
 import android.widget.ListView;
-import android.widget.TableLayout;
-import android.widget.TableRow;
-import android.widget.TextView;
+import android.widget.Switch;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -21,7 +15,6 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
 
-import com.example.milkmobileapp.Contact;
 import com.example.milkmobileapp.DBHelper;
 import com.example.milkmobileapp.DBManager;
 import com.example.milkmobileapp.Milk;
@@ -60,14 +53,20 @@ public class MilkFragment extends Fragment implements AdapterCallback {
         MilkViewModel milkViewModel =
                 new ViewModelProvider(this).get(MilkViewModel.class);
         this.milkViewModel = milkViewModel;
-        milkViewModel.setMilks(manager);
+        milkViewModel.setDBManager(manager);
         milkViewModel.getMilks().observe(getViewLifecycleOwner(), milkObserver);
-
+        Switch filter = binding.filter;
         View btn = binding.buttonAdd;
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 openCreateMilk(v);
+            }
+        });
+
+        filter.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                milkViewModel.setFilter(isChecked);
             }
         });
 
