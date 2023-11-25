@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.CompoundButton;
 import android.widget.ListView;
 import android.widget.Switch;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -22,7 +23,9 @@ import com.example.milkmobileapp.R;
 import com.example.milkmobileapp.databinding.FragmentMilkBinding;
 import com.example.milkmobileapp.ui.editMilk.EditMilkFragment;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.OptionalDouble;
 
 public class MilkFragment extends Fragment implements AdapterCallback {
 
@@ -85,6 +88,25 @@ public class MilkFragment extends Fragment implements AdapterCallback {
         ListView listView = binding.milkList;
         MilkAdapter milkAdapter = new MilkAdapter(this.getContext(), milks, this);
         listView.setAdapter(milkAdapter);
+
+        double average;
+        average = calculateAverage(milks);
+        DecimalFormat decimalFormat = new DecimalFormat("0.00");
+        String stringAverage = decimalFormat.format(average);
+
+        TextView text_average = binding.textAverage;
+        text_average.setText(stringAverage + " т");
+    }
+
+    private double calculateAverage(ArrayList <Milk> milks) {
+        Integer sum = 0;
+        if(!milks.isEmpty()) {
+            for (Milk milk : milks) {
+                sum += milk.Production;
+            }
+            return sum.doubleValue() / milks.size();
+        }
+        return sum;
     }
 
     @Override
