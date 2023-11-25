@@ -1,6 +1,7 @@
 plugins {
     id("com.android.application")
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
+
 }
 
 android {
@@ -43,6 +44,15 @@ dependencies {
     implementation("androidx.navigation:navigation-fragment:2.7.4")
     implementation("androidx.navigation:navigation-ui:2.7.4")
     implementation("com.google.android.gms:play-services-maps:18.1.0")
+
+    implementation ("com.karumi:dexter:6.2.3")
+    implementation ("com.github.dangiashish:Google-Direction-Api:1.6")
+    implementation ("com.google.android.material:material:1.9.0")
+    implementation ("com.google.android.gms:play-services-location:21.0.1")
+
+    //implementation ("com.karumi:dexter:6.2.3")
+    //implementation ("com.github.dangiashish:Google-Direction-Api:1.6")
+
     implementation ("com.google.android.gms:play-services-maps:x.y.z")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
