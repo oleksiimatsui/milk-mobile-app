@@ -49,10 +49,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="0dp"
-        android:cacheColorHint="@color/black"
-        android:divider="@color/black"
+        android:cacheColorHint="@color/blue"
+        android:divider="@color/blue"
         android:dividerHeight="1dp"
-        android:outlineAmbientShadowColor="@color/black"
+        android:outlineAmbientShadowColor="@color/blue"
 
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/linearLayout" />

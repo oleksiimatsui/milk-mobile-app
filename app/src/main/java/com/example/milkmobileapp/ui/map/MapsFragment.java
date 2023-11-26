@@ -1,14 +1,10 @@
 package com.example.milkmobileapp.ui.map;
-
-
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-
-
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Geocoder;
@@ -19,7 +15,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.Manifest;
 import android.widget.Toast;
-
 import com.codebyashish.googledirectionapi.AbstractRouting;
 import com.codebyashish.googledirectionapi.ErrorHandling;
 import com.codebyashish.googledirectionapi.RouteDrawing;
@@ -39,25 +34,15 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.maps.model.RoundCap;
-
-
 import java.util.ArrayList;
-
-
 import android.location.Address;
-
-
-
 import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 
-
-
 public class MapsFragment extends Fragment implements OnMapReadyCallback, RouteListener {
-    private LatLng currentLocation, contactLocation;
     GoogleMap gMap;
-    String endLocationName;
+    private FragmentMapsBinding binding;
     private FusedLocationProviderClient fusedLocationProviderClient;
     private static final String CONTACT = "CONTACT";
     private Contact contact;
@@ -75,7 +60,6 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, RouteL
             contact = (Contact) getArguments().getSerializable(CONTACT);
         }
     }
-    private FragmentMapsBinding binding;
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -83,8 +67,6 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, RouteL
                              @Nullable Bundle savedInstanceState) {
         binding = FragmentMapsBinding.inflate(inflater, container, false);
         binding.address.setText(contact.address);
-        endLocationName = contact.address;
-        //return inflater.inflate(R.layout.fragment_maps, container, false);
         return binding.getRoot();
     }
 
@@ -114,19 +96,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, RouteL
     }
 
 
-    private void setContactLocation() {
-        Geocoder geocoder = new Geocoder(getContext(), Locale.getDefault());
-        try {
-            List<Address> addressList = geocoder.getFromLocationName(endLocationName, 1);
-            if(addressList.size()>0){
-                Address address = addressList.get(0);
-                contactLocation = new LatLng(address.getLatitude(), address.getLongitude());
-                gMap.addMarker(new MarkerOptions().position(contactLocation).title(contact.name));
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
+
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
         if (ActivityCompat.checkSelfPermission(this.getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this.getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -136,16 +106,20 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, RouteL
         if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             fusedLocationProviderClient.getLastLocation().addOnSuccessListener(requireActivity(), location -> {
                 if (location != null) {
-                    LatLng myLocation = new LatLng(location.getLatitude(), location.getLongitude());
-                    currentLocation = myLocation;
-                    googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myLocation, 15));
-                    //підготавлюємо мапу
+                    LatLng currentLocation = new LatLng(location.getLatitude(), location.getLongitude());
+                    googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 15));
                     gMap = googleMap;
                     gMap.clear();
-                    //після цього ставимо адресу контакту
-                    setContactLocation();
-                    //після цього прокладаємо маршрут
-                    getRoute(currentLocation, contactLocation);
+                    LatLng contactLocation = null;
+                    try {
+                        contactLocation = setContactLocation();
+                    } catch (IOException e) {
+                        return;
+                    }
+                    if(contactLocation != null){
+                        gMap.addMarker(new MarkerOptions().position(contactLocation).title(contact.name));
+                        getRoute(currentLocation, contactLocation);
+                    }
                 } else {
                     Toast.makeText(requireContext(), "Unable to get current location", Toast.LENGTH_SHORT).show();
                 }
@@ -153,45 +127,18 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, RouteL
         } else {
             Toast.makeText(requireContext(), "Location permission not granted", Toast.LENGTH_SHORT).show();
         }
-
     }
 
-    /*@Override
-    public void onMapReady(@NonNull GoogleMap googleMap) {
-        if (ActivityCompat.checkSelfPermission(this.getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this.getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            return;
+    private LatLng setContactLocation() throws IOException {
+        Geocoder geocoder = new Geocoder(getContext(), Locale.getDefault());
+        List<Address> addressList = geocoder.getFromLocationName(contact.address, 1);
+        if(addressList.size()>0){
+            Address address = addressList.get(0);
+            LatLng contactLocation = new LatLng(address.getLatitude(), address.getLongitude());
+            return contactLocation;
         }
-        googleMap.setMyLocationEnabled(true);
-        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            fusedLocationProviderClient.getLastLocation().addOnSuccessListener(requireActivity(), location -> {
-                if (location != null) {
-                    LatLng myLocation = new LatLng(location.getLatitude(), location.getLongitude());
-                    endLocation = myLocation;
-                    googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myLocation, 15));
-                    googleMap.addMarker(new MarkerOptions().position(myLocation).title("My Location"));
-                } else {
-                    Toast.makeText(requireContext(), "Unable to get current location", Toast.LENGTH_SHORT).show();
-                }
-            });
-        } else {
-            Toast.makeText(requireContext(), "Location permission not granted", Toast.LENGTH_SHORT).show();
-        }
-
-        gMap = googleMap;
-        gMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
-            @Override
-            public void onMapClick(@NonNull LatLng latLng) {
-                MarkerOptions markerOptions = new MarkerOptions();
-                markerOptions.position(latLng);
-                startLocation = latLng;
-                gMap.clear();
-                //geoLocate();
-                gMap.addMarker(markerOptions);
-
-                getRoute(startLocation, endLocation);
-            }
-        });
-    }*/
+        return null;
+    }
 
     private void getRoute(LatLng start, LatLng end) {
         RouteDrawing routeDrawing = new RouteDrawing.Builder()
