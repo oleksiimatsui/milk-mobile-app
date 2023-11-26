@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.CompoundButton;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -41,6 +42,13 @@ public class ContactsFragment extends Fragment {
         View root = binding.getRoot();
         contactsViewModel.setList(this.getContext().getContentResolver());
         contactsViewModel.getList().observe(getViewLifecycleOwner(), listObserver);
+
+        binding.filter.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                contactsViewModel.setFilter(isChecked);
+            }
+        });
+
         return root;
     }
     final Observer<ArrayList<Contact>> listObserver = new Observer<ArrayList<Contact>>() {

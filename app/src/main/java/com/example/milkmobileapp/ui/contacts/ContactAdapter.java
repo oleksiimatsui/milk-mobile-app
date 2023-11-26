@@ -55,7 +55,7 @@ public class ContactAdapter extends BaseAdapter {
         Contact contact = (dataList.get(position));
 
         TextView text = convertView.findViewById(R.id.contact_name);
-        text.setText(contact.name);
+        text.setText(contact.name + " " + contact.lastName);
         text.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
