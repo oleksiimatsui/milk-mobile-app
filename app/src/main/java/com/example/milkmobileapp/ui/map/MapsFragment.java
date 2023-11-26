@@ -11,6 +11,7 @@ import androidx.fragment.app.Fragment;
 
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.location.Geocoder;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -43,17 +44,21 @@ import com.google.android.gms.maps.model.RoundCap;
 import java.util.ArrayList;
 
 
+import android.location.Address;
+
+
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Locale;
+
+
 
 public class MapsFragment extends Fragment implements OnMapReadyCallback, RouteListener {
-
-    //String endLocationName;
-
-    private LatLng startLocation, endLocation;
-    //boolean isPermissionGranted;
+    private LatLng currentLocation, contactLocation;
     GoogleMap gMap;
-
+    String endLocationName;
     private FusedLocationProviderClient fusedLocationProviderClient;
-
     private static final String CONTACT = "CONTACT";
     private Contact contact;
     public static MapsFragment newInstance(Contact contact) {
@@ -78,7 +83,8 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, RouteL
                              @Nullable Bundle savedInstanceState) {
         binding = FragmentMapsBinding.inflate(inflater, container, false);
         binding.address.setText(contact.address);
-       //return inflater.inflate(R.layout.fragment_maps, container, false);
+        endLocationName = contact.address;
+        //return inflater.inflate(R.layout.fragment_maps, container, false);
         return binding.getRoot();
     }
 
@@ -107,7 +113,50 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, RouteL
         }
     }
 
+
+    private void setContactLocation() {
+        Geocoder geocoder = new Geocoder(getContext(), Locale.getDefault());
+        try {
+            List<Address> addressList = geocoder.getFromLocationName(endLocationName, 1);
+            if(addressList.size()>0){
+                Address address = addressList.get(0);
+                contactLocation = new LatLng(address.getLatitude(), address.getLongitude());
+                gMap.addMarker(new MarkerOptions().position(contactLocation).title(contact.name));
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
     @Override
+    public void onMapReady(@NonNull GoogleMap googleMap) {
+        if (ActivityCompat.checkSelfPermission(this.getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this.getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        googleMap.setMyLocationEnabled(true);
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            fusedLocationProviderClient.getLastLocation().addOnSuccessListener(requireActivity(), location -> {
+                if (location != null) {
+                    LatLng myLocation = new LatLng(location.getLatitude(), location.getLongitude());
+                    currentLocation = myLocation;
+                    googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myLocation, 15));
+                    //підготавлюємо мапу
+                    gMap = googleMap;
+                    gMap.clear();
+                    //після цього ставимо адресу контакту
+                    setContactLocation();
+                    //після цього прокладаємо маршрут
+                    getRoute(currentLocation, contactLocation);
+                } else {
+                    Toast.makeText(requireContext(), "Unable to get current location", Toast.LENGTH_SHORT).show();
+                }
+            });
+        } else {
+            Toast.makeText(requireContext(), "Location permission not granted", Toast.LENGTH_SHORT).show();
+        }
+
+    }
+
+    /*@Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
         if (ActivityCompat.checkSelfPermission(this.getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this.getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
@@ -142,7 +191,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, RouteL
                 getRoute(startLocation, endLocation);
             }
         });
-    }
+    }*/
 
     private void getRoute(LatLng start, LatLng end) {
         RouteDrawing routeDrawing = new RouteDrawing.Builder()
@@ -190,4 +239,3 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, RouteL
         Toast.makeText(getContext(), "Route Canceled", Toast.LENGTH_SHORT).show();
     }
 }
-
